@@ -1,0 +1,816 @@
+# Task1 : Vlan Config
+
+## Switch 1 
+undo terminal monitor
+sys
+sysname SW1
+vlan batch 2 to 20
+interf e0/0/1
+port link-type access 
+port default vlan 10
+interf e0/0/2
+port link-type trunk
+port trunk pvid vlan 19
+port trunk allow-pass vlan 19 to 20
+interf g0/0/1
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+interf g0/0/2
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+q
+q
+save
+
+## Switch 2
+undo terminal monitor
+sys
+sysname SW2
+vlan batch 2 to 20
+interf g0/0/1
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+interf g0/0/3
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+interf g0/0/5
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+q
+q
+save
+y
+
+
+
+## Switch 3
+undo terminal monitor
+sys
+sysname SW3
+vlan batch 2 to 20
+interf g0/0/1
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+interf g0/0/2
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+interf g0/0/3
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+interf g0/0/5
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+q
+q
+save
+y
+
+
+-- Config AC equipement g0/0/1 trunk pvid1 allow pass vlan 19 and 20
+undo terminal monitor
+sys
+interface GigabitEthernet0/0/1
+port link-type trunk
+port trunk allow-pass vlan 19 to 20
+q
+q
+sav
+y
+
+
+-- Config PE1
+undo terminal monitor
+sys
+sysna PE1
+interface GigabitEthernet0/0/1.1
+dot1q termination vid 1
+interface GigabitEthernet0/0/3.1
+dot1q termination vid 1
+q
+q
+sav
+y
+
+
+-- Config FW1
+undo terminal monitor
+sys
+sysna FW1
+vlan batch 2 to 20
+interface GigabitEthernet1/0/5.1
+vlan-type dot1q 10
+interface GigabitEthernet1/0/5.2
+vlan-type dot1q 20
+interface GigabitEthernet1/0/3.1
+vlan-type dot1q 1
+quit
+quit
+save
+y
+
+
+-- Config FW2
+undo terminal monitor
+sys
+sysna FW2
+vlan batch 2 to 20
+interface GigabitEthernet1/0/5.1
+vlan-type dot1q 10
+interface GigabitEthernet1/0/5.2
+vlan-type dot1q 20
+interface GigabitEthernet1/0/3.1
+vlan-type dot1q 1
+quit
+quit
+save
+y
+
+
+
+# Task 2 : IP Address Configuration
+
+-- Config FW1
+undo terminal monitor
+sys
+interface GigabitEthernet1/0/1
+ip address 15.1.1.1 24
+interface GigabitEthernet1/0/3
+ip address 10.2.1.1 24
+interface GigabitEthernet1/0/3.1
+ip address 10.2.2.1 24
+interface GigabitEthernet1/0/5.1
+ip address 192.168.1.2 24
+interface GigabitEthernet1/0/5.2
+ip address 192.168.2.2 24
+q
+q
+sav
+y
+
+
+-- Config FW2
+undo terminal monitor
+system-view
+interface GigabitEthernet1/0/1
+ip address 15.1.1.2 24
+interface GigabitEthernet1/0/3
+ip address 10.3.1.1 24
+interface GigabitEthernet1/0/3.1
+ip address 10.3.2.1 24
+interface GigabitEthernet1/0/5.1
+ip address 192.168.1.3 24
+interface GigabitEthernet1/0/5.2
+ip address 192.168.2.3 24
+quit
+quit
+save
+yes
+
+-- Config FW3
+undo terminal monitor
+sys
+sysname FW3
+interface GigabitEthernet1/0/1
+ip address 30.1.1.1 30
+interface GigabitEthernet1/0/2
+ip address 20.1.3.2 30
+quit
+quit
+save
+yes
+
+-- Config PE1
+undo terminal monitor
+sys
+interface Loopback0
+ip address 1.1.1.1 32
+interface GigabitEth0/0/1
+ip address 10.2.1.2 30
+interface GigabitEth0/0/1.1
+ip address 10.2.2.2 30
+interface GigabitEth0/0/2
+ip address 20.1.1.1 30
+interface GigabitEth0/0/3
+ip address 10.3.1.2 30
+interface GigabitEth0/0/3.1
+ip address 10.3.2.2 30
+quit
+quit
+save
+yes
+
+-- Config P
+undo terminal monitor
+system-view
+sysname P
+interface Loopback0
+ip address 2.2.2.2 32
+interface GigabitEth0/0/1
+ip address 20.1.2.1 30
+interface GigabitEth0/0/2
+ip address 20.1.1.2 30
+quit
+quit
+save
+yes
+
+
+-- Config PE2
+undo terminal monitor
+system-view
+sysname PE2
+interface Loopback0
+ip address 3.3.3.3 32
+interface GigabitEth0/0/1
+ip address 20.1.2.2 30
+interface GigabitEth0/0/2
+ip address 20.1.3.1 30
+interface GigabitEth0/0/3
+ip address 20.1.4.1 30
+quit
+quit
+save
+yes
+
+-- Config Internet
+undo terminal monitor
+system-view
+sysname Internet
+interface Loopback0
+ip address 16.16.16.16 32
+interface GigabitEth0/0/3
+ip address 20.1.4.2 30
+quit
+quit
+save
+yes
+
+-- Config DC-GW
+undo terminal monitor
+sys
+sysna DC-GW
+interface Loopback0
+ip address 11.11.11.11 32
+interface GigabitEth0/0/1
+ip address 30.1.1.2 30
+interface GigabitEth0/0/2
+ip address 30.1.2.1 30
+interface GigabitEth0/0/3
+ip address 30.1.3.1 30
+quit
+quit
+save
+yes
+
+-- Config Leaf1
+undo terminal monitor
+sys
+sysn Leaf1
+interface Loopback0
+ip address 12.12.12.12 32
+interface GigabitEth0/0/1
+ip address 172.16.3.254 24
+interface GigabitEth0/0/2
+ip address 30.1.2.2 30
+interface GigabitEth0/0/3
+ip address 172.16.1.254 24
+quit
+quit
+save
+yes
+
+
+-- Config Leaf2
+undo terminal monitor
+sys
+sysna Leaf2
+interface Loopback0
+ip address 13.13.13.13 32
+interface Ether0/0/1
+ip address 172.16.2.254 24
+interface GigabitEth0/0/3
+ip address 30.1.3.2 24
+q
+q
+sav
+y
+
+
+-- Config Web-Client
+Ethernet0/0/0 192.168.1.1 255.255.255.0
+
+-- Config Web-Server
+Ethernet0/0/0 172.16.1.1 255.255.255.0
+
+-- Config VM1
+Ethernet0/0/1 172.16.3.1 255.255.255.0
+
+-- Config VM2
+Ethernet0/0/1 172.16.2.1 255.255.255.0
+
+
+# Task 3 : MSTP Configuration
+## SW1
+undo terminal monitor 
+system-view
+stp mode mstp
+stp region-configuration
+region-name RG1
+instance 1 vlan 2 to 10
+instance 2 vlan 11 to 20
+active region-configuration
+quit
+stp enable
+interface e0/0/1
+stp edged-port enable
+quit
+interface e0/0/2
+stp edged-port enable
+quit
+quit
+save
+yes
+
+
+## SW2
+undo terminal monitor 
+system-view
+stp mode mstp
+stp region-configuration
+region-name RG1
+instance 1 vlan 2 to 10
+instance 2 vlan 11 to 20
+active region-configuration
+quit
+stp enable
+stp instance 1 root primary
+stp instance 2 root secondary
+interface g0/0/1
+stp root-protection
+quit
+interface g0/0/5
+stp disable
+quit
+quit
+save
+yes
+
+
+## SW3
+undo terminal monitor 
+system-view
+stp mode mstp
+stp region-configuration
+region-name RG1
+instance 1 vlan 2 to 10
+instance 2 vlan 11 to 20
+active region-configuration
+quit
+stp enable
+stp instance 2 root primary
+stp instance 1 root secondary
+interface g0/0/2
+stp root-protection
+quit
+interface g0/0/1
+stp edged-port enable
+quit
+interface g0/0/5
+stp disable
+quit
+quit
+save
+yes
+
+
+# Task 4 : Security Zone Config on Firewalls
+
+## FW1
+undo terminal monitor 
+system-view
+firewall zone trust
+add interface GigabitEthernet1/0/5.1
+add interface GigabitEthernet1/0/5.2
+quit
+firewall zone untrust
+add interface GigabitEthernet1/0/3
+add interface GigabitEthernet1/0/3.1
+quit
+firewall zone dmz
+add interface GigabitEthernet1/0/1
+quit
+quit
+save
+yes
+
+
+## FW2
+undo terminal monitor 
+system-view
+firewall zone trust
+add interface GigabitEthernet1/0/5.1
+add interface GigabitEthernet1/0/5.2
+quit
+firewall zone untrust
+add interface GigabitEthernet1/0/3
+add interface GigabitEthernet1/0/3.1
+qui
+firewall zone dmz
+add interface GigabitEthernet1/0/1
+quit
+quit
+save
+yes
+
+
+## FW3
+undo terminal monitor 
+system-view
+firewall zone trust
+add interface GigabitEthernet1/0/1
+quit
+firewall zone untrust
+add interface GigabitEthernet1/0/2
+quit
+quit
+save
+yes
+
+
+?? # Task 5: VRRP, Hot Standby, and Sec Policy Conf on Firewalls
+##1. VRRP configuration
+### FW1
+undo terminal monitor
+system-view
+interface GigabitEthernet1/0/5.1 vrid 1 virtual-ip 192.168.1.254 active
+interface GigabitEthernet1/0/5.2 vrid 2 virtual-ip 192.168.2.254 standby
+
+### FW2
+undo terminal monitor
+system-view
+interface GigabitEthernet1/0/5.1 vrid 1 virtual-ip 192.168.1.254 active
+interface GigabitEthernet1/0/5.2 vrid 2 virtual-ip 192.168.2.254 standby
+
+##2. Hot Standby HRP configuration
+### FW1
+hrrp enable
+hrrp mirror session enable
+hrrp interface GigabitEthernet1/0/1 remote 152.1.1.2
+hrrp enable
+hrrp load balance device
+display hrrp interface
+
+### FW2
+hrrp enable
+hrrp mirror session enable
+hrrp interface GigabitEthernet1/0/1 remote 152.1.1.1
+hrrp enable
+hrrp load balance device
+
+##3. Security policies config
+### FW1
+security-policy
+rule name web
+source-zone trust
+destination-zone untrust
+source-address 192.168.1.0 24
+access-authentication
+action permit
+quit
+rule name Wireless
+source-zone trust
+destination-zone untrust
+source-address 192.168.2.0 24
+access-authentication
+action permit
+quit
+
+
+### FW3
+undo terminal monitor
+system-view
+security-policy
+rule name web
+source-zone trust
+destination-zone untrust
+source-address 172.168.1.0 24
+access-authentication
+action permit
+quit
+quit
+
+##4. NAT config
+### FW1
+nat-policy
+rule name web
+source-zone trust
+destination-zone untrust
+action source-nat easy-ip
+quit
+interface GigabitEthernet1/0/5
+service-mannage enable
+service-mannage ping permit
+
+### FW3
+nat-policy
+rule name web
+source-zone trust
+destination-zone untrust
+action source-nat easy-ip
+quit
+quit
+nat server web protocol tcp global 100.1.1.1 8080 inside 172.16.1.1 80
+
+
+# Task 6: Conf of Static Public Network Routes
+## FW1
+system-view
+ip route-static 0.0.0.0 0 10.2.1.2
+ip route-static 100.1.1.1 32 10.2.2.2
+quit
+save
+yes
+
+## FW2
+system-view
+ip route-static 0.0.0.0 0 10.3.1.2
+ip route-static 100.1.1.1 32 10.3.2.2
+quit
+save
+yes
+
+## PE1
+system-view
+ip route-static 192.168.2.0 24 10.2.1.1
+ip route-static 192.168.2.0 24 10.3.1.1
+quit
+save
+yes
+
+## FW3
+system-view
+ip route-static 100.1.1.1 32 Null 0
+ip route-static 0.0.0.0 0 20.1.3.1
+quit
+save
+yes
+
+
+
+
+# Task 7: Dynamic Routing Config for Public Network
+## 1. Deploy IS-IS and 2. Authentication - MD5
+### PE1
+u t m
+system-view
+isis 1
+is-level level-2
+network-entity 01.0010.0100.1001.00
+quit
+interface Loopback0
+isis enable 1
+isis authentication-mode md5 ICTEXAM
+quit
+interface GigabitEthernet0/0/2
+isis enable 1
+isis authentication-mode md5 ICTEXAM
+quit
+quit
+save
+yes
+
+### P
+u t m
+system-view
+isis 1
+is-level level-2
+network-entity 01.0020.0200.2002.00
+interface Loopback0
+isis enable 1
+isis authentication-mode md5 ICTEXAM
+quit
+interface GigabitEthernet0/0/1
+isis enable 1
+isis authentication-mode md5 ICTEXAM
+quit
+interface GigabitEthernet0/0/2
+isis enable 1
+isis authentication-mode md5 ICTEXAM
+quit
+quit
+save
+yes
+
+### PE2
+u t m
+system-view
+isis 1
+is-level level-2
+network-entity 01.0030.0300.3003.00
+interface Loopback0
+isis enable 1
+isis authentication-mode md5 ICTEXAM
+quit
+interface GigabitEthernet0/0/1
+isis enable 1
+isis authentication-mode md5 ICTEXAM
+quit
+display isis peer
+quit
+save
+yes
+
+
+## 3. Deploy OSPF
+...
+
+
+
+# Task 8: MPLS VPN Configuration
+## 1. MP-IBGP
+
+
+
+## 3. OSPF in DATA CENTER
+### Leaf1
+sys
+ospf 1
+area 0
+network 172.16.3.254 0.0.0.255
+network 30.1.2.2 0.0.0.3
+network 172.16.1.254 0.0.0.255
+network 12.12.12.12 0.0.0.0
+q
+q
+q
+sa
+y
+
+
+### Leaf2
+sys
+ospf 1
+area 0
+network 172.16.2.254 0.0.0.255
+network 30.1.3.2 0.0.0.3
+network 13.13.13.13 0.0.0.0
+q
+q
+q
+sa
+y
+
+### DC-GW
+sys
+ospf 1
+area 0
+network 30.1.1.2 0.0.0.3
+network 30.1.2.1 0.0.0.3
+network 30.1.3.1 0.0.0.3
+network 11.11.11.11 0.0.0.0
+q
+q
+q
+sa
+y
+
+
+# Task 8 : MPLS VPN Configuration
+...
+
+
+# Task 9: GRE Configuration
+## Leaf1
+system-view
+interface Tunnel 0/0/0
+ip address 173.1.2.1 24
+tunnel-protocol gre
+source 12.12.12.12
+destination 13.13.13.13
+quit
+ip route-static 172.16.2.1 24 Tunnel 0/0/0 prefe 9
+q
+sa
+y
+
+## Leaf2
+system-view
+interface Tunnel 0/0/0
+ip address 173.1.2.2 24
+tunnel-protocol gre
+source 13.13.13.13
+destination 12.12.12.12
+quit
+ip route-static 172.16.3.1 24 Tunnel 0/0/0 prefe 9
+q
+sa
+y
+
+
+# Task 10: WLAN Configuration
+## Wired Net Config
+...
+
+## WLAN Service Config
+undo terminal monitor
+system-view
+sysname AC
+vlan batch 19 20
+interface GigabitEthernet0/0/1
+port link-type trunk
+port trunk allow-pass vlan 19 20
+quit
+dhcp enable
+ip pool For_AP
+gateway-list 192.168.19.254
+network 192.168.19.0 mask 255.255.255.0
+q
+ip pool STA
+gateway-list 192.168.2.254
+network 192.168.2.0 mask 255.255.255.0
+q
+interface Vlanif19
+ip address 192.168.19.254 255.255.255.0
+dhcp select global
+quit
+interface Vlanif20
+ip address 192.168.2.254 255.255.255.0
+dhcp select global
+q
+wlan
+ap-group name default
+quit
+wlan
+regulatory-domain-profile name default
+country-code cn
+q
+wlan
+ap-group name default
+regulatory-domain-profile default
+y
+q
+capwap source interface Vlanif 19
+wlan
+ap auth-mode mac-auth
+ap-id 0 ap-mac 00e0-fc4f-4600
+ap-name ap1
+ap-group default
+y
+quit
+display ap all
+security-profile name s1
+security wpa-wpa2 psk pass-phrase Huawei@123 aes
+q
+ssid-profile name s1
+ssid s1
+quit
+vap-profile name p1
+forward-mode direct-forward
+service-vlan vlan-id 20
+security-profile s1
+ssid-profile s1
+quit
+ap-group name default
+vap-profile p1 wlan 1 radio all
+q
+q
+q
+save
+y
+
+
+
+
+--------------------------------------
+display vap all
+display station all
+
+
+
+
+default login:password for Firewalls : admin:Admin@123
+ap : 2000
+ac : 2014
+sw1 : 2001
+sw2 : 2002
+sw3 : 2003
+FW1:  2016  admin:Huawei@123
+Fw2 : 2015  admin:Huawei@123
+Fw3 : 2010  admin:Huawei@123
+pe1 : 2006
+p   : 2007
+pe2 : 2008
+Internet : 2009
+
+clear configuration interface Ethernet0/0/2
+y
+
