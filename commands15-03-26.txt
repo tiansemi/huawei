@@ -1,0 +1,55 @@
+interf e0/0/3
+port link-type trunk
+port trunk pvid vlan 78
+port trunk allow-pass vlan 10 20 30 78
+interf e0/0/6
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 710
+
+interf g0/0/1
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+interf g0/0/2
+port link-type trunk
+port trunk pvid vlan 1
+port trunk allow-pass vlan 2 to 20
+q
+q
+save
+
+##
+
+
+undo terminal monitor
+sys
+interface vlanif 10
+ip address 192.168.10.251 24
+ipv6 enable
+ipv6 address 192:168:10::254 64
+interface vlanif 20
+ip address 172.16.10.251 24
+interface vlanif 30
+ip address 192.168.100.251 24
+interface vlanif 57
+ip address 10.5.7.2 30
+ipv6 enable
+ipv6 address 2001:5:7::2 126
+interface vlanif 78
+ip address 10.7.8.1 30
+ipv6 enable
+ipv6 address 2001:7:8::1 126
+interface vlanif 710
+ip address 10.7.10.1 30
+interface loop 0
+ip address 1.1.1.7 32
+ipv6 enable
+ipv6 address 2001::7 128
+q
+q
+sav
+y
+
+
+###
