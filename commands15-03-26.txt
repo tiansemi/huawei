@@ -1,121 +1,118 @@
-interf e0/0/3
+# DEBUT TERMINAL
+undo terminal monitor
+system-view
+
+# RENAME DEVICE
+sysname SW1
+
+# SAVE CONFIGURATION
+quit
+quit
+save
+yes
+
+# VLAN et ADRESSAGE IP 
+## Port Trunk
+interface e0/0/3
 port link-type trunk
 port trunk pvid vlan 78
 port trunk allow-pass vlan 10 20 30 78
-interf e0/0/6
-port link-type trunk
-port trunk pvid vlan 1
-port trunk allow-pass vlan 710
+display vlan
 
-interf g0/0/1
-port link-type trunk
-port trunk pvid vlan 1
-port trunk allow-pass vlan 2 to 20
-interf g0/0/2
-port link-type trunk
-port trunk pvid vlan 1
-port trunk allow-pass vlan 2 to 20
-q
-q
-save
+## Port Access
+interface g0/0/6
+port link-type access
+port default vlan 10
+display port vlan
 
-##
-
-
-undo terminal monitor
-sys
-interface vlanif 10
+## Adressage IP/IPv6
+interface vlanif10 | GigabitEthernet0/0/1
 ip address 192.168.10.251 24
 ipv6 enable
 ipv6 address 192:168:10::254 64
+display ip interface brief
+display ipv6 interface brief
+
+
+# CONFIGURATION SOUS-INTERFACE
+## Router
+interface GigabitEthernet0/0/1.10
+dot1q termination vid 10
+
+## Firewall
+interface GigabitEthernet1/0/5.1
+vlan-type dot1q 10
+
+
+# CONFIGURATION MSTP
+stp mode mstp
+stp region-configuration
+region-name RG1
+instance 1 vlan 2 to 10
+instance 2 vlan 11 to 20
+active region-configuration
+quit
+stp enable
+stp instance 1 root primary
+stp instance 2 root secondary
+interface e0/0/1
+stp edged-port enable
+quit
+interface g0/0/1
+stp root-protection
+interface g0/0/5
+stp disable
+display stp
+display stp region-configuration
+display stp instance
+
+
+# SECURITY ZONE CONFIGURATION
+firewall zone trust
+add interface GigabitEthernet1/0/5.1
+add interface GigabitEthernet1/0/5.2
+quit
+firewall zone untrust
+add interface GigabitEthernet1/0/3
+add interface GigabitEthernet1/0/3.1
+quit
+firewall zone dmz
+add interface GigabitEthernet1/0/1
+quit
+display firewall zone
+display firewall zone trust
+display firewall zone untrust
+display firewall zone dmz
+display ip interface brief
+display security-policy
+
+
+# CONFIGURATION VRRP
 interface vlanif 20
-ip address 172.16.10.251 24
-interface vlanif 30
-ip address 192.168.100.251 24
-interface vlanif 57
-ip address 10.5.7.2 30
-ipv6 enable
-ipv6 address 2001:5:7::2 126
-interface vlanif 78
-ip address 10.7.8.1 30
-ipv6 enable
-ipv6 address 2001:7:8::1 126
-interface vlanif 710
-ip address 10.7.10.1 30
-interface loop 0
-ip address 1.1.1.7 32
-ipv6 enable
-ipv6 address 2001::7 128
-q
-q
-sav
-y
-
-
-###
-
-
-
-undo terminal monitor
-sys
-interface vlanif 10
-ip address 192.168.10.252 24
-interface vlanif 20
-ip address 172.16.10.252 24
-interface vlanif 30
-ip address 192.168.100.252 24
-interface vlanif 58
-ip address 10.5.8.2 30
-ipv6 enable
-ipv6 address 2001:5:8::2 126
-interface vlanif 78
-ip address 10.7.8.2 30
-ipv6 enable
-ipv6 address 2001:7:8::2 126
-interface loop 0
-ip address 1.1.1.8 32
-ipv6 enable
-ipv6 address 2001::8 128
-q
-q
-sav
-y
-
-
-###
-
-u t m
-sys
-interface vlanif 10
-vrrp vrid 1 virtual-ip 192.168.10.254
-vrrp vrid 1 priority 120
+vrrp vrid 1 virtual-ip 172.16.10.254
+vrrp vrid 1 priority 120 (MASTER)
 vrrp vrid 1 preempt-mode timer delay 20
-quit
-interface vlanif 20
-vrrp vrid 2 virtual-ip 172.16.10.254
-quit
-interface vlanif 30
-vrrp vrid 3 virtual-ip 192.168.100.254
+vrrp vrid 1 track interface GigabitEthernet1/0/1 reduced 30
 quit
 
+interface GigabitEthernet1/0/5.1
+vrrp vrid 1 virtual-ip 172.16.10.254
+vrrp vrid 1 priority 100 (BACKUP)
+display vrrp
 
-##
+# CONFIGURATION HRP
+hrp enable
+hrp interface GigabitEthernet1/0/1
+hrp peer 152.1.1.2
+hrp auto-sync enable
 
-u t m
-sys
-interface vlanif 10
-vrrp vrid 1 virtual-ip 192.168.10.254
-quit
-interface vlanif 20
-vrrp vrid 2 virtual-ip 172.16.10.254
-vrrp vrid 2 priority 120
-vrrp vrid 2 preempt-mode timer delay 20
-quit
-interface vlanif 30
-vrrp vrid 3 virtual-ip 192.168.100.254
-vrrp vrid 3 priority 120
-vrrp vrid 3 preempt-mode timer delay 20
-quit
+hrp track interface GigabitEthernet1/0/1
+display hrrp interface
+display hrp state
+
+
+
+
 
 
 ##
@@ -141,6 +138,85 @@ area 0
 q
 q
 interface vlanif58
-ospfv3 1 area 0
+ospfv3 1 
+area 0
 inter Vlanif78
-ospfv3 1 area 0
+ospfv3 1 
+area 0
+
+## 
+[R3-isis-100]dis this
+#
+isis 100
+ is-level level-2
+ cost-style wide
+ timer lsp-generation 1 50 50 level-1
+ timer lsp-generation 1 50 50 level-2
+ flash-flood level-1
+ flash-flood level-2
+ bfd all-interfaces min-rx-interval 500 detect-multiplier 5
+ network-entity 49.0100.0010.0100.1003.00
+ is-name R3
+ area-authentication-mode md5 M&K=ZZD~67*5NeL&h\4Y;`]#
+ timer spf 1 50 50
+ #
+ ipv6 enable topology ipv6
+ #
+##
+
+
+u t m
+system-view
+isis 100
+is-name R2
+is-level level-2
+network-entity 49.0100.0010.0100.1001.00
+quit
+interface GigabitEthernet0/0/0
+isis enable 100
+isis authentication-mode md5 Huawei@123
+quit
+interface GigabitEthernet0/0/3
+isis enable 100
+isis authentication-mode md5 Huawei@123
+quit
+quit
+save
+yes
+
+
+
+ ipv6-family vpnv6
+  policy vpn-target
+  peer 1.1.1.2 enable
+  peer 1.1.1.3 enable
+
+
+
+bgp 100
+ router-id 1.1.1.1
+ peer 1.1.1.2 as-number 100
+ peer 1.1.1.2 connect-interface LoopBack0
+ peer 1.1.1.3 as-number 100
+ peer 1.1.1.3 connect-interface LoopBack0
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.2 enable
+  peer 1.1.1.3 enable
+ #
+ ipv6-family unicast
+  undo synchronization
+  peer 1.1.1.2 enable
+  peer 1.1.1.3 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 1.1.1.2 enable
+  peer 1.1.1.3 enable
+ #
+ ipv6-family vpnv6
+  policy vpn-target
+  peer 1.1.1.2 enable
+  peer 1.1.1.3 enable
+#
