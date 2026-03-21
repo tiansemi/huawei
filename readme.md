@@ -100,8 +100,11 @@ stp root-protection
 ```
 interface Vlanif10
 vrrp vrid 1 virtual-ip 192.168.10.254
-vrrp vrid 1 priority 120
-vrrp vrid 1 preempt-mode
+vrrp vrid 1 priority 120 // Si master
+vrrp vrid 1 preempt-mode timer delay 20 //optional
+vrrp vrid 1 track interface GigabitEthernet1/0/1 reduced 30 //optional
+quit
+
 ```
 
 ---
@@ -159,9 +162,13 @@ ip route-static 0.0.0.0 0 X.X.X.X
 # 🛰️ 11. OSPF
 
 ```
+router id 10.10.10.2
 ospf 1
+ospf 1 vpn-instance Finance&OA // Si routeur est PE
 area 0
-network 10.0.0.0 0.0.0.255
+network 10.0.12.2 0.0.0.3
+quit
+
 ```
 
 ---
@@ -171,7 +178,16 @@ network 10.0.0.0 0.0.0.255
 ```
 isis 1
 is-level level-2
-network-entity 49.0001.0000.0000.0001.00
+cost-style wide
+network-entity 49.0001.0100.1001.0002.00
+is-name R2
+quit
+interface LoopBack0
+isis enable 1
+quit
+interface GigabitEthernet0/0/1
+isis enable 1
+quit
 ```
 
 ---
@@ -179,8 +195,21 @@ network-entity 49.0001.0000.0000.0001.00
 # 🌐 13. BGP
 
 ```
-bgp 100
-peer 1.1.1.1 as-number 100
+bgp 65100
+ undo default ipv4-unicast // optional
+ router-id 1.1.1.1
+ peer 10.10.10.3 as-number 65100
+ peer 10.10.10.3 connect-interface LoopBack0
+ peer 10.10.10.4 as-number 65100
+ peer 10.10.10.4 connect-interface LoopBack0
+ ipv4-family vpnv4
+  undo policy vpn-target // Si routeur RR | P (celui entre les PE)
+  peer 10.10.10.3 enable
+  peer 10.10.10.3 reflect-client // Si routeur RR | P (celui entre les PE)
+  peer 10.10.10.4 enable
+  peer 10.10.10.4 reflect-client // Si routeur RR | P (celui entre les PE)
+  quit
+ quit
 ```
 
 ---
@@ -188,8 +217,19 @@ peer 1.1.1.1 as-number 100
 # 🏷️ 14. MPLS
 
 ```
+mpls lsr-id 10.10.10.2
+mpls
+quit
+mpls ldp
+quit
+interface GigabitEthernet0/0/1
 mpls
 mpls ldp
+quit
+interface GigabitEthernet0/0/2
+mpls
+mpls ldp
+quit
 ```
 
 ---
@@ -197,9 +237,15 @@ mpls ldp
 # 🧳 15. VPN MPLS
 
 ```
-ip vpn-instance VPN1
-route-distinguisher 100:1
-vpn-target 100:1 both
+ip vpn-instance Finance&OA
+ route-distinguisher 65100:12
+ vpn-target 65100:12 65001:65002
+ quit
+interface GigabitEthernet0/0/3
+ display this
+ ip binding vpn-instance Finance&OA
+ ip address 10.0.12.2 255.255.255.0
+ quit
 ```
 
 ---
@@ -259,4 +305,3 @@ tracert X.X.X.X
 * Toujours activer routing
 * Vérifier ACL/NAT ordre
 * Vérifier VRRP priorité
-
